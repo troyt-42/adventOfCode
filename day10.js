@@ -42,13 +42,12 @@ inputs.forEach(function(input) {
 })
 
 function executeComparsion (bot, value1, value2) {
-  if ((+value1 === 5 && +value2 === 2) || (+value1 === 2 && +value2 === 5)) {
+  if ((+value1 === 17 && +value2 === 61)) {
     console.log(bot);
   }
   let rule = rules[bot];
-  let high = value1 > value2 ? value1 : value2;
-  let low = value2 === high ? value1 : value2;
-
+  let high = +value1 > +value2 ? +value1 : +value2;
+  let low = +value2 === +high ? +value1 : +value2;
   // console.log(rule, high, low, bots);
   if (rule.low[0] === 'output') {
     if (outputBox[rule.low[1]]) {
@@ -65,12 +64,6 @@ function executeComparsion (bot, value1, value2) {
   } else if (rule.low[0] === 'bot') {
     if (bots[rule.low[1]]) {
       bots[rule.low[1]].push(low);
-      if (bots[rule.low[1]].length >= 2) {
-        // console.log(bots);
-        executeComparsion(rule.low[1], bots[rule.low[1]][0], bots[rule.low[1]][1]);
-        bots[rule.low[1]] = [];
-
-      }
     } else {
       bots[rule.low[1]] = [low];
     }
@@ -91,14 +84,27 @@ function executeComparsion (bot, value1, value2) {
   } else if (rule.high[0] === 'bot') {
     if (bots[rule.high[1]]) {
       bots[rule.high[1]].push(high);
-      if (bots[rule.high[1]].length >= 2) {
-        executeComparsion(rule.high[1], bots[rule.high[1]][0], bots[rule.high[1]][1]);
-        bots[rule.high[1]] = [];
-      }
     } else {
       bots[rule.high[1]] = [high];
     }
   }
+
+  if (rule.high[0] === 'bot') {
+    if (bots[rule.high[1]].length >= 2) {
+      // console.log(bots[rule.high[1]], rule.high[1]);
+      executeComparsion(rule.high[1], bots[rule.high[1]][0], bots[rule.high[1]][1]);
+      bots[rule.high[1]] = [];
+    }
+  }
+
+  if (rule.low[0] === 'bot') {
+    if (bots[rule.low[1]].length >= 2) {
+      // console.log(bots[rule.low[1]], rule.low[1]);
+      executeComparsion(rule.low[1], bots[rule.low[1]][0], bots[rule.low[1]][1]);
+      bots[rule.low[1]] = [];
+    }
+  }
+
 }
 inputs.forEach(function(input) {
   let numbers = input.match(/[0-9]*/g).filter((d) => d !== '');
@@ -107,9 +113,9 @@ inputs.forEach(function(input) {
     let value = numbers[0];
     let bot = numbers[1];
     if (bots[bot]) {
-      if (bots[bot].length >= 1) {
-        // console.log(bot, bots[bot][0], value);
-        executeComparsion(bot, bots[bot][0], value);
+      bots[bot].push(value);
+      if (bots[bot].length >= 2) {
+        executeComparsion(bot, bots[bot][0], bots[bot][1]);
         bots[bot] = [];
       }
     } else {
@@ -121,3 +127,4 @@ inputs.forEach(function(input) {
 console.log('RULEs', rules);
 console.log('BOTs:', bots);
 console.log('OUTPUTs:', outputBox);
+console.log(outputBox[0] * outputBox[1] * outputBox[2]);
